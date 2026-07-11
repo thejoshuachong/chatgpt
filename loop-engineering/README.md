@@ -1,8 +1,8 @@
 # LOOP ENGINEERING ∞ + × PARALLEL AGENTS™
 
-This directory is the implementation repository for the **Sovereign Compounding Execution and Intelligence Estate**.
+This directory is the operational repository for the **Sovereign Compounding Execution and Intelligence Estate**.
 
-## Current canonical design baseline
+## Version 6.0 canonical baseline
 
 - 45 DNAs
 - 66 Operating Systems
@@ -15,33 +15,51 @@ This directory is the implementation repository for the **Sovereign Compounding 
 - 10 Blueprints
 - 14 Playbooks
 - 14 Strategies
-- 20+ cross-cutting assurance systems
+- 20 cross-cutting assurance systems
 - 3 priority master brand candidates
-- 1 master lifecycle
-- 1 integrated certification architecture
 
-These counts describe the Version 6.0 design baseline. The registry is authoritative and future counts must be generated from it.
+The canonical registry contains **297 named assets**. Counts are generated from the catalogue and protected by automated tests.
 
-## Repository structure
+## What is operational now
 
-- `registry/` — canonical machine-readable assets and dependencies
-- `schemas/` — validation schemas
-- `docs/` — architecture, implementation, validation, governance, and proof boundaries
-- `templates/` — operational mission and assurance artifacts
-- `automations/` — Codex automation specifications
-- `tests/` — registry, schema, dependency, and regression checks
+- canonical, machine-readable asset registry
+- immutable identifiers and count validation
+- deterministic Minimum Viable Sovereign Stack activation
+- conditional operating-system selection based on mission context
+- mission intake, planning, risk, evidence, and readiness models
+- high-risk human-approval and rollback gates
+- four-dimensional 1,000-point calibre scoring
+- Proof Envelope model and maturity constraints
+- estate-wide audit reporting
+- command-line interface
+- automated CI and daily scheduled governance audit
+- automatic GitHub incident creation when scheduled assurance fails
 
-## Core operating doctrine
+## Installation
 
-- truth before appearance
-- evidence before proof
-- preservation before replacement
-- additive improvement by default
-- genuine specialist diversity where valuable
-- proportionate complexity
-- human sovereignty for consequential decisions
-- scale only after evidence, control, economics, adoption, and recovery are demonstrated
-- simplify, renew, replace, or retire when required
+```bash
+cd loop-engineering
+python -m pip install -e '.[test]'
+```
+
+## Core commands
+
+```bash
+loop-estate registry build
+loop-estate registry validate
+loop-estate registry list --family OS
+loop-estate registry show OS-056
+
+loop-estate mission init \
+  --objective "Implement a controlled pilot" \
+  --completion "Produce an approved pilot plan" \
+  --risk medium \
+  --output mission.json
+loop-estate mission plan mission.json
+loop-estate mission readiness mission.json
+
+loop-estate audit --output audit-report.md
+```
 
 ## Minimum Viable Sovereign Stack
 
@@ -58,6 +76,10 @@ These counts describe the Version 6.0 design baseline. The registry is authorita
 11. Observability and Telemetry OS™
 12. Sovereign Calibre Assurance and Certification OS™
 
+## Hands-off operation
+
+After this implementation reaches `main`, GitHub Actions runs the deterministic estate audit each day at 08:00 Singapore time. Failed assurance opens or updates an operational GitHub issue automatically. This does not require another chat prompt.
+
 ## Proof boundary
 
-The estate is architected and implementation-ready. Individual assets are not automatically battle-tested, proven, validated, or 1,000/1,000-certified. Those designations require live operating evidence, stress testing, outcome measurement, independent review, and a completed Proof Envelope.
+Repository tests demonstrate encoded architecture and software invariants. They do not establish battle-tested status, market validation, legal compliance in a specific jurisdiction, customer outcomes, financial returns, or 1,000/1,000 certification. Those claims require real operating evidence, stress testing, independent review, and a completed Proof Envelope.
