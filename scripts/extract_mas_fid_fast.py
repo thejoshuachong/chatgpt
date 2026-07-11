@@ -4,226 +4,231 @@ import csv
 import json
 import math
 import re
-from collections import defaultdict
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any
 from urllib.parse import urljoin, urlparse
 
 import requests
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
 
 BASE = "https://eservices.mas.gov.sg"
-LIST = f"{BASE}/fid/institution"
-OUT = Path("fast_output")
+LIST_URL = f"{BASE}/fid/institution"
+OUT = Path("fast_output_v2")
 OUT.mkdir(exist_ok=True)
-EXPECTED = 3640
 PAGE_SIZE = 100
+MAS_HEADLINE_RESULTS = 3640
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36"
-DETAIL_PATTERN = re.compile(r"/fid/institution/detail/", re.I)
 PHONE_RE = re.compile(r"(?<!\d)(?:\+?65[\s-]?)?[689]\d{3}[\s-]?\d{4}(?!\d)")
 POSTAL_RE = re.compile(r"\b\d{6}\b")
-
-LICENCES = [
-    "Approved CIS Trustee", "Approved Clearing House", "Approved Exchange", "Approved Holding Company",
-    "Approved Insurance Broker", "Authorised Reinsurer (Composite)", "Authorised Reinsurer (General)",
-    "Authorised Reinsurer (Life)", "Capital Markets Services Licensee", "Captive Insurer (Composite)",
-    "Captive Insurer (General)", "Captive Insurer (Life)", "Central Depository System",
-    "Credit and Charge Card Licensee", "Designated Payment System Operator",
-    "Designated Payment System Settlement Institution", "Direct Insurer (Composite)",
-    "Direct Insurer (General)", "Direct Insurer (Life)", "Exempt Capital Markets Services Entity",
-    "Exempt Financial Adviser", "Exempt Insurance Broker", "Exempt Trust Company", "Finance Company",
-    "Financial Holding Company (Banking)", "Financial Holding Company (Insurance)", "Full Bank",
-    "Licensed Credit Bureau", "Licensed Financial Adviser", "Licensed Trade Repository", "Licensed Trust Company",
-    "Lloyd's Asia Scheme", "Local Bank", "Major Payment Institution", "Merchant Bank",
-    "Money-changing Licensee", "Qualifying Full Bank", "Recognised Clearing House", "Recognised Market Operator",
-    "Registered Insurance Broker", "Reinsurer (Composite)", "Reinsurer (General)", "Reinsurer (Life)",
-    "Representative Office (Banking)", "Representative Office (Insurance)", "SGS Primary Dealer",
-    "Standard Payment Institution", "Wholesale Bank",
-]
-SECTOR_MAP = {
-    **{x: "Insurance" for x in LICENCES if any(k in x for k in ("Insur", "Reinsur", "Lloyd"))},
-    **{x: "Payments" for x in LICENCES if any(k in x for k in ("Payment", "Money-changing", "Credit and Charge"))},
-    **{x: "Financial Advisory" for x in LICENCES if "Financial Adviser" in x},
-}
-for x in LICENCES:
-    SECTOR_MAP.setdefault(x, "Banking" if any(k in x for k in ("Bank", "Finance Company", "SGS Primary Dealer", "Credit Bureau")) else "Capital Markets")
 
 
 def clean(value: str | None) -> str:
     return re.sub(r"\s+", " ", value or "").strip()
 
 
-def unique(items: list[str]) -> list[str]:
-    seen: set[str] = set()
-    out: list[str] = []
-    for item in items:
-        item = clean(item)
-        if item and item not in seen:
-            seen.add(item)
-            out.append(item)
-    return out
+def sector_for(licence: str) -> str:
+    x = licence.lower()
+    if any(k in x for k in ("insurance", "insurer", "reinsurer", "lloyd")):
+        return "Insurance"
+    if any(k in x for k in ("payment", "money-changing", "credit and charge card")):
+        return "Payments"
+    if "financial adviser" in x:
+        return "Financial Advisory"
+    if any(k in x for k in ("bank", "finance company", "sgs primary dealer", "credit bureau")):
+        return "Banking"
+    return "Capital Markets"
 
 
-def fetch_page(page: int) -> tuple[int, str, str]:
-    url = f"{LIST}?page={page}&count={PAGE_SIZE}"
+def fetch(url: str) -> str:
     last: Exception | None = None
-    for attempt in range(5):
+    for attempt in range(6):
         try:
-            r = requests.get(url, timeout=45, headers={"User-Agent": UA})
+            r = requests.get(url, headers={"User-Agent": UA}, timeout=45)
             r.raise_for_status()
-            return page, url, r.text
+            return r.text
         except Exception as exc:
             last = exc
-            import time
-            time.sleep(1 + attempt)
-    raise RuntimeError(f"page {page} failed: {last}")
+            time.sleep(1.2 ** attempt)
+    raise RuntimeError(f"Failed to fetch {url}: {last}")
 
 
-def card_for(anchor: Tag, ancestor_counts: dict[int, int]) -> Tag:
-    best = anchor.parent if isinstance(anchor.parent, Tag) else anchor
-    node: Any = anchor.parent
-    while isinstance(node, Tag):
-        count = ancestor_counts.get(id(node), 0)
-        if count == 1:
-            best = node
-        elif count > 1:
-            break
-        if node.name in ("body", "html"):
-            break
-        node = node.parent
-    return best
-
-
-def icon_value(card: Tag, keyword: str) -> str:
-    for img in card.find_all("img"):
-        attrs = " ".join(str(img.get(k, "")) for k in ("src", "alt", "title", "class")).lower()
-        if keyword in attrs:
-            node: Any = img.parent
-            for _ in range(4):
-                if not isinstance(node, Tag):
-                    break
-                text = clean(node.get_text(" ", strip=True))
-                if text and len(text) < 700:
-                    return text
-                node = node.parent
+def external_website(card, source_url: str) -> str:
+    for a in card.select("div.info a[href]"):
+        href = urljoin(source_url, a.get("href", ""))
+        host = urlparse(href).netloc.lower()
+        if host and "mas.gov.sg" not in host and not href.startswith(("mailto:", "tel:")):
+            return href
     return ""
 
 
-def parse_page(page: int, source_url: str, html: str) -> list[dict[str, str]]:
+def parse_page(page_no: int, source_url: str, html: str) -> list[dict[str, object]]:
     soup = BeautifulSoup(html, "lxml")
-    anchors = [a for a in soup.find_all("a", href=DETAIL_PATTERN) if clean(a.get_text(" ", strip=True))]
-    ancestor_counts: dict[int, int] = defaultdict(int)
-    for anchor in anchors:
-        node: Any = anchor
-        while isinstance(node, Tag):
-            ancestor_counts[id(node)] += 1
-            if node.name in ("body", "html"):
-                break
-            node = node.parent
-
-    rows: list[dict[str, str]] = []
-    seen: set[str] = set()
-    for anchor in anchors:
-        profile = urljoin(BASE, anchor.get("href", "")).split("#", 1)[0]
-        if profile in seen:
+    cards = soup.select("div.result-list.resize > div.inner")
+    rows: list[dict[str, object]] = []
+    for card in cards:
+        profile_a = card.select_one('a[href*="/fid/institution/detail/"]')
+        if not profile_a:
             continue
-        seen.add(profile)
-        name = clean(anchor.get_text(" ", strip=True))
-        card = card_for(anchor, ancestor_counts)
-        text = clean(card.get_text("\n", strip=True))
-        lines = unique(card.get_text("\n", strip=True).splitlines())
+        profile_url = urljoin(BASE, profile_a.get("href", "")).split("#", 1)[0]
+        heading = card.select_one("h3")
+        name = clean(heading.get_text(" ", strip=True) if heading else profile_a.get_text(" ", strip=True))
+        licences = [clean(a.get_text(" ", strip=True)) for a in card.select("div.category a.FilterCategory")]
+        licences = list(dict.fromkeys(x for x in licences if x))
 
-        phone_hint = icon_value(card, "phone")
-        phones = PHONE_RE.findall(phone_hint) or PHONE_RE.findall(text)
-        phone = clean(phones[0]) if phones else ""
+        phone = ""
+        phone_a = card.select_one('a[href^="tel:"]')
+        if phone_a:
+            phone = clean(phone_a.get_text(" ", strip=True)) or clean(phone_a.get("href", "").replace("tel:", ""))
+        if not phone:
+            matches = PHONE_RE.findall(clean(card.get_text(" ", strip=True)))
+            phone = clean(matches[0]) if matches else ""
 
-        address_hint = icon_value(card, "address")
-        if POSTAL_RE.search(address_hint):
-            address = address_hint
-        else:
-            address_lines = [line for line in lines if POSTAL_RE.search(line)]
-            address = max(address_lines, key=len) if address_lines else ""
-
-        websites: list[str] = []
-        for a in card.find_all("a", href=True):
-            href = urljoin(source_url, a.get("href", ""))
-            host = urlparse(href).netloc.lower()
-            if host and "mas.gov.sg" not in host and not href.startswith(("mailto:", "tel:")):
-                websites.append(href)
-        website = unique(websites)[0] if websites else ""
-
-        found_licences = [lic for lic in LICENCES if lic in text]
-        sectors = unique([SECTOR_MAP[lic] for lic in found_licences])
+        address = ""
+        for tr in card.select("div.info tr"):
+            img = tr.select_one("img")
+            marker = " ".join(str(img.get(k, "")) for k in ("src", "alt", "title")) if img else ""
+            text = clean(tr.get_text(" ", strip=True))
+            if "address" in marker.lower() or POSTAL_RE.search(text):
+                address = text
+                break
 
         rows.append({
             "institution_name": name,
-            "sector": "; ".join(sectors),
-            "licence_type_status": "; ".join(found_licences),
             "office_number": phone,
             "address": address,
-            "website": website,
-            "mas_profile_url": profile,
+            "website": external_website(card, source_url),
+            "mas_profile_url": profile_url,
             "source_list_url": source_url,
-            "source_page": str(page),
+            "source_page": page_no,
+            "licences": licences,
         })
     return rows
 
 
 def main() -> None:
-    pages = math.ceil(EXPECTED / PAGE_SIZE)
-    raw_pages: dict[int, tuple[str, str]] = {}
+    first_url = f"{LIST_URL}?page=1&count={PAGE_SIZE}"
+    first_html = fetch(first_url)
+    first_soup = BeautifulSoup(first_html, "lxml")
+    box = first_soup.select_one("div.box-wrapper")
+    if not box:
+        raise SystemExit("Could not locate MAS result wrapper")
+    total_pages = int(box.get("data-total", "0"))
+    headline_results = int(box.get("data-hit", "0"))
+    if total_pages <= 0:
+        raise SystemExit("MAS page count was not available")
+
+    page_html: dict[int, tuple[str, str]] = {1: (first_url, first_html)}
     with ThreadPoolExecutor(max_workers=8) as pool:
-        futures = {pool.submit(fetch_page, p): p for p in range(1, pages + 1)}
+        futures = {}
+        for page_no in range(2, total_pages + 1):
+            url = f"{LIST_URL}?page={page_no}&count={PAGE_SIZE}"
+            futures[pool.submit(fetch, url)] = (page_no, url)
         for future in as_completed(futures):
-            page, url, html = future.result()
-            raw_pages[page] = (url, html)
-            print(f"fetched page {page}: {len(html)} chars", flush=True)
+            page_no, url = futures[future]
+            page_html[page_no] = (url, future.result())
+            print(f"Fetched page {page_no}/{total_pages}", flush=True)
 
-    all_rows: dict[str, dict[str, str]] = {}
-    page_counts: dict[str, int] = {}
-    for page in range(1, pages + 1):
-        url, html = raw_pages[page]
-        rows = parse_page(page, url, html)
-        page_counts[str(page)] = len(rows)
-        for row in rows:
-            all_rows[row["mas_profile_url"]] = row
-        print(f"parsed page {page}: {len(rows)} rows, cumulative {len(all_rows)}", flush=True)
+    raw_cards: list[dict[str, object]] = []
+    page_card_counts: dict[str, int] = {}
+    for page_no in range(1, total_pages + 1):
+        url, html = page_html[page_no]
+        rows = parse_page(page_no, url, html)
+        page_card_counts[str(page_no)] = len(rows)
+        raw_cards.extend(rows)
+        print(f"Parsed page {page_no}: {len(rows)} cards", flush=True)
 
-    data = sorted(all_rows.values(), key=lambda x: x["institution_name"].casefold())
-    for i, row in enumerate(data, 1):
-        row.update({
-            "no": str(i), "verification_date": "2026-07-11", "family_office_classification": "",
-            "telemarketing_priority": "", "calling_status": "Not Called", "contact_result": "",
-            "follow_up_date": "", "assigned_to": "", "notes": "",
+    # Merge repeated profiles defensively and retain every exact category printed by MAS.
+    merged: dict[str, dict[str, object]] = {}
+    for row in raw_cards:
+        key = str(row["mas_profile_url"])
+        if key not in merged:
+            merged[key] = dict(row)
+        else:
+            current = merged[key]
+            old_lic = list(current.get("licences", []))
+            new_lic = list(row.get("licences", []))
+            current["licences"] = list(dict.fromkeys(old_lic + new_lic))
+            for field in ("office_number", "address", "website"):
+                if not current.get(field) and row.get(field):
+                    current[field] = row[field]
+
+    institutions = sorted(merged.values(), key=lambda r: str(r["institution_name"]).casefold())
+    unique_rows: list[dict[str, object]] = []
+    licence_rows: list[dict[str, object]] = []
+    for idx, row in enumerate(institutions, 1):
+        licences = list(row.get("licences", []))
+        sectors = list(dict.fromkeys(sector_for(x) for x in licences))
+        unique_rows.append({
+            "no": idx,
+            "institution_name": row["institution_name"],
+            "sector": "; ".join(sectors),
+            "licence_type_status": "; ".join(licences),
+            "office_number": row["office_number"],
+            "address": row["address"],
+            "website": row["website"],
+            "mas_profile_url": row["mas_profile_url"],
+            "source_list_url": row["source_list_url"],
+            "source_page": row["source_page"],
+            "verification_date": "2026-07-11",
+            "family_office_classification": "Unreviewed",
+            "telemarketing_priority": "",
+            "calling_status": "Not Called",
+            "contact_result": "",
+            "follow_up_date": "",
+            "assigned_to": "",
+            "notes": "",
         })
+        for licence in licences:
+            licence_rows.append({
+                "licence_record_no": len(licence_rows) + 1,
+                "institution_no": idx,
+                "institution_name": row["institution_name"],
+                "sector": sector_for(licence),
+                "licence_type_status": licence,
+                "office_number": row["office_number"],
+                "address": row["address"],
+                "website": row["website"],
+                "mas_profile_url": row["mas_profile_url"],
+                "source_page": row["source_page"],
+                "verification_date": "2026-07-11",
+            })
 
-    fields = [
-        "no", "institution_name", "sector", "licence_type_status", "office_number", "address", "website",
-        "mas_profile_url", "source_list_url", "source_page", "verification_date", "family_office_classification",
-        "telemarketing_priority", "calling_status", "contact_result", "follow_up_date", "assigned_to", "notes",
-    ]
-    with (OUT / "mas_fid_master.csv").open("w", newline="", encoding="utf-8-sig") as f:
-        writer = csv.DictWriter(f, fieldnames=fields)
-        writer.writeheader()
-        writer.writerows(data)
-    (OUT / "mas_fid_master.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    unique_fields = list(unique_rows[0].keys()) if unique_rows else []
+    licence_fields = list(licence_rows[0].keys()) if licence_rows else []
+    with (OUT / "mas_fid_unique_institutions.csv").open("w", newline="", encoding="utf-8-sig") as f:
+        w = csv.DictWriter(f, fieldnames=unique_fields)
+        w.writeheader(); w.writerows(unique_rows)
+    with (OUT / "mas_fid_licence_records.csv").open("w", newline="", encoding="utf-8-sig") as f:
+        w = csv.DictWriter(f, fieldnames=licence_fields)
+        w.writeheader(); w.writerows(licence_rows)
+    (OUT / "mas_fid_unique_institutions.json").write_text(json.dumps(unique_rows, ensure_ascii=False), encoding="utf-8")
 
     report = {
-        "expected_count": EXPECTED,
-        "unique_records": len(data),
-        "page_counts": page_counts,
-        "with_phone": sum(bool(x["office_number"]) for x in data),
-        "with_address": sum(bool(x["address"]) for x in data),
-        "with_website": sum(bool(x["website"]) for x in data),
-        "first_name": data[0]["institution_name"] if data else None,
-        "last_name": data[-1]["institution_name"] if data else None,
-        "duplicate_profile_urls_removed": sum(page_counts.values()) - len(data),
+        "mas_headline_results": headline_results,
+        "configured_headline_results": MAS_HEADLINE_RESULTS,
+        "total_pages": total_pages,
+        "page_card_counts": page_card_counts,
+        "raw_institution_cards": len(raw_cards),
+        "unique_institution_profiles": len(unique_rows),
+        "exact_licence_records": len(licence_rows),
+        "duplicate_profiles_removed": len(raw_cards) - len(unique_rows),
+        "with_phone": sum(bool(r["office_number"]) for r in unique_rows),
+        "with_address": sum(bool(r["address"]) for r in unique_rows),
+        "with_website": sum(bool(r["website"]) for r in unique_rows),
+        "first_name": unique_rows[0]["institution_name"] if unique_rows else None,
+        "last_name": unique_rows[-1]["institution_name"] if unique_rows else None,
+        "headline_matches_licence_records": headline_results == len(licence_rows),
     }
-    (OUT / "extraction_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+    (OUT / "reconciliation_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps(report, indent=2), flush=True)
-    if len(data) != EXPECTED:
-        raise SystemExit(f"VALIDATION FAILED: expected {EXPECTED}, got {len(data)}")
+
+    if headline_results != MAS_HEADLINE_RESULTS:
+        raise SystemExit(f"MAS headline changed: expected {MAS_HEADLINE_RESULTS}, saw {headline_results}")
+    if len(unique_rows) < 2500:
+        raise SystemExit(f"Too few unique institutions extracted: {len(unique_rows)}")
+    if len(licence_rows) != headline_results:
+        raise SystemExit(f"Licence-level reconciliation failed: headline={headline_results}, extracted={len(licence_rows)}")
 
 
 if __name__ == "__main__":
