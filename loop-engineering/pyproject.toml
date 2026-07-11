@@ -4,13 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "loop-engineering-estate"
-version = "0.1.0"
-description = "Canonical registry and assurance harness for LOOP ENGINEERING ∞ + × PARALLEL AGENTS"
+version = "0.2.0"
+description = "Operational registry, mission engine, and assurance harness for LOOP ENGINEERING ∞ + × PARALLEL AGENTS"
 requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
 test = ["pytest>=8.0"]
+
+[project.scripts]
+loop-estate = "loop_engineering.cli:main"
+
+[tool.setuptools]
+packages = ["loop_engineering"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
