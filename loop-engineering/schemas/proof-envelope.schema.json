@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://loop-engineering.local/schemas/proof-envelope.schema.json",
+  "title": "LOOP ENGINEERING Proof Envelope",
+  "type": "object",
+  "required": [
+    "asset_name", "version", "intended_purpose", "test_environment",
+    "operators_and_users", "number_of_uses", "duration", "baseline",
+    "benchmark", "success_metrics", "guardrails", "failures", "recoveries",
+    "replication_status", "independent_review_status", "contexts_tested",
+    "contexts_untested", "limitations", "review_or_expiry_date",
+    "permitted_claim_language", "responsible_authority"
+  ],
+  "properties": {
+    "number_of_uses": {"type": "integer", "minimum": 0},
+    "operators_and_users": {"type": "array", "items": {"type": "string"}},
+    "contexts_untested": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "limitations": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

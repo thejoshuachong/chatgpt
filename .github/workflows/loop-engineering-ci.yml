@@ -1,0 +1,57 @@
+name: Loop Engineering Estate CI
+
+on:
+  pull_request:
+    paths:
+      - "AGENTS.md"
+      - "loop-engineering/**"
+      - ".github/workflows/loop-engineering-ci.yml"
+      - ".github/workflows/estate-audit.yml"
+  push:
+    branches: [main]
+    paths:
+      - "AGENTS.md"
+      - "loop-engineering/**"
+      - ".github/workflows/loop-engineering-ci.yml"
+      - ".github/workflows/estate-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-estate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: loop-engineering
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: loop-engineering/pyproject.toml
+      - name: Install estate package and tests
+        run: python -m pip install --upgrade pip && python -m pip install -e '.[test]'
+      - name: Build canonical registry
+        run: python -m loop_engineering registry build
+      - name: Validate canonical registry
+        run: python -m loop_engineering registry validate
+      - name: Run estate assurance tests
+        run: pytest
+      - name: Run operational smoke test
+        run: |
+          python -m loop_engineering mission init \
+            --objective "Implement a controlled evidence pilot" \
+            --completion "Produce a validated pilot plan" \
+            --risk medium \
+            --output /tmp/mission.json
+          python -m loop_engineering mission plan /tmp/mission.json
+          python -m loop_engineering mission readiness /tmp/mission.json
+      - name: Generate audit report
+        run: python -m loop_engineering audit --output audit-report.md
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: loop-engineering-audit
+          path: loop-engineering/audit-report.md
