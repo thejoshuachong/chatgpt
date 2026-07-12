@@ -1,0 +1,408 @@
+{
+  "requests": [
+    {
+      "url": "https://eservices.mas.gov.sg/fid/institution",
+      "status": 200,
+      "final_url": "https://eservices.mas.gov.sg/fid/institution",
+      "bytes": 61091,
+      "detail_links": 10,
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://eservices.mas.gov.sg/fid/institution?count=0",
+      "status": 200,
+      "final_url": "https://eservices.mas.gov.sg/fid/institution?count=0",
+      "bytes": 60082,
+      "detail_links": 10,
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://eservices.mas.gov.sg/fid/institution?count=10",
+      "status": 200,
+      "final_url": "https://eservices.mas.gov.sg/fid/institution?count=10",
+      "bytes": 60083,
+      "detail_links": 10,
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://eservices.mas.gov.sg/fid/institution?count=50",
+      "status": 200,
+      "final_url": "https://eservices.mas.gov.sg/fid/institution?count=50",
+      "bytes": 125279,
+      "detail_links": 50,
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://eservices.mas.gov.sg/fid/institution?count=100",
+      "status": 200,
+      "final_url": "https://eservices.mas.gov.sg/fid/institution?count=100",
+      "bytes": 210567,
+      "detail_links": 100,
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://eservices.mas.gov.sg/fid/institution?page=2",
+      "status": 200,
+      "final_url": "https://eservices.mas.gov.sg/fid/institution?page=2",
+      "bytes": 60350,
+      "detail_links": 10,
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://eservices.mas.gov.sg/fid/institution?page=2&count=100",
+      "status": 200,
+      "final_url": "https://eservices.mas.gov.sg/fid/institution?page=2&count=100",
+      "bytes": 206341,
+      "detail_links": 100,
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://eservices.mas.gov.sg/fid/institution?count=100&page=2",
+      "status": 200,
+      "final_url": "https://eservices.mas.gov.sg/fid/institution?count=100&page=2",
+      "bytes": 206341,
+      "detail_links": 100,
+      "content_type": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://eservices.mas.gov.sg/fid/institution/print?count=0",
+      "status": 200,
+      "final_url": "https://eservices.mas.gov.sg/fid/institution/print?count=0",
+      "bytes": 2836,
+      "detail_links": 0,
+      "content_type": "text/html; charset=utf-8"
+    }
+  ],
+  "browser": {
+    "requests": [
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/institution",
+        "resource_type": "document",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/slick-carousel/slick/slick.css",
+        "resource_type": "stylesheet",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/slick-carousel/slick/slick-theme.css",
+        "resource_type": "stylesheet",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/css/main.min.css",
+        "resource_type": "stylesheet",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/css/print.min.css",
+        "resource_type": "stylesheet",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/css/fid-custom.css",
+        "resource_type": "stylesheet",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/fid-custom.js",
+        "resource_type": "script",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/logo.gif",
+        "resource_type": "image",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-print.png",
+        "resource_type": "image",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-a-minus.png",
+        "resource_type": "image",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-a-plus.png",
+        "resource_type": "image",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-directory-home.png",
+        "resource_type": "image",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-print-list.png",
+        "resource_type": "image",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-contact-phone.png",
+        "resource_type": "image",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-contact-address.png",
+        "resource_type": "image",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-contact-link.png",
+        "resource_type": "image",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/bg-header.jpg",
+        "resource_type": "image",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-tooltip.png",
+        "resource_type": "image",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/font-awesome/fonts/fontawesome-webfont.woff?v=4.5.0",
+        "resource_type": "font",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/jquery/dist/jquery.min.js",
+        "resource_type": "script",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/bootstrap/dist/js/popper.min.js",
+        "resource_type": "script",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/bootstrap/dist/js/bootstrap.min.js",
+        "resource_type": "script",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/slick-carousel/slick/slick.min.js",
+        "resource_type": "script",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/store/store.modern.min.js",
+        "resource_type": "script",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/rv-jquery-fontsize/js/rv-jquery-fontsize.min.js",
+        "resource_type": "script",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Scripts/jquery.unobtrusive-ajax.min.js",
+        "resource_type": "script",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/plugins.min.js",
+        "resource_type": "script",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/main.js",
+        "resource_type": "script",
+        "post_data": null
+      },
+      {
+        "method": "GET",
+        "url": "https://eservices.mas.gov.sg/fid/Content/css/local-fonts/mas-glyphs/mas-glyphs.ttf?p9qbkf",
+        "resource_type": "font",
+        "post_data": null
+      }
+    ],
+    "responses": [
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/institution",
+        "content_type": "text/html; charset=utf-8"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/slick-carousel/slick/slick.css",
+        "content_type": "text/css"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/slick-carousel/slick/slick-theme.css",
+        "content_type": "text/css"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/css/main.min.css",
+        "content_type": "text/css"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/logo.gif",
+        "content_type": "image/gif"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-print.png",
+        "content_type": "image/png"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/css/fid-custom.css",
+        "content_type": "text/css"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-a-minus.png",
+        "content_type": "image/png"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-a-plus.png",
+        "content_type": "image/png"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-directory-home.png",
+        "content_type": "image/png"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/fid-custom.js",
+        "content_type": "application/javascript"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-contact-phone.png",
+        "content_type": "image/png"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-contact-address.png",
+        "content_type": "image/png"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-contact-link.png",
+        "content_type": "image/png"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/bg-header.jpg",
+        "content_type": "image/jpeg"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-tooltip.png",
+        "content_type": "image/png"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/css/print.min.css",
+        "content_type": "text/css"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/font-awesome/fonts/fontawesome-webfont.woff?v=4.5.0",
+        "content_type": "font/x-woff"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/css/local-fonts/mas-glyphs/mas-glyphs.ttf?p9qbkf",
+        "content_type": "application/octet-stream"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/jquery/dist/jquery.min.js",
+        "content_type": "application/javascript"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/slick-carousel/slick/slick.min.js",
+        "content_type": "application/javascript"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/store/store.modern.min.js",
+        "content_type": "application/javascript"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/rv-jquery-fontsize/js/rv-jquery-fontsize.min.js",
+        "content_type": "application/javascript"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/bootstrap/dist/js/bootstrap.min.js",
+        "content_type": "application/javascript"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/plugins.min.js",
+        "content_type": "application/javascript"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Scripts/jquery.unobtrusive-ajax.min.js",
+        "content_type": "application/javascript"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/vendor/bootstrap/dist/js/popper.min.js",
+        "content_type": "application/javascript"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/js/main.js",
+        "content_type": "application/javascript"
+      },
+      {
+        "status": 200,
+        "url": "https://eservices.mas.gov.sg/fid/Content/img/ic-print-list.png",
+        "content_type": "image/png"
+      }
+    ],
+    "initial_url": "https://eservices.mas.gov.sg/fid/institution",
+    "initial_detail_links": 10,
+    "after_100_url": "https://eservices.mas.gov.sg/fid/institution",
+    "after_100_detail_links": 10,
+    "clicked_page_2": true,
+    "after_page2_url": "https://eservices.mas.gov.sg/fid/institution",
+    "after_page2_detail_links": 10
+  }
+}
